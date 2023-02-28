@@ -16,9 +16,6 @@
 #define ETURN_DURATION    400 // ms
 #define ETURN_SPEED       300
 
-
-Zumo32U4OLED display;
-
 Zumo32U4ButtonA buttonA;
 Zumo32U4Buzzer buzzer;
 Zumo32U4Motors motors;
@@ -37,13 +34,12 @@ int turnCount = 0;
 void waitForButtonAndCountDown()
 {
   ledYellow(1);
-  display.clear();
-  display.print(F("Press A"));
+
 
   buttonA.waitForButton();
 
   ledYellow(0);
-  display.clear();
+
 
   // Play Countdown notes
   for (int i = 0; i < 3; i++)
