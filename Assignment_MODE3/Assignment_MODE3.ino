@@ -4,7 +4,7 @@
 #include <Zumo32U4.h>
 
 // This is the threshold for the line and proximity sensors
-#define QTR_THRESHOLD     800  // microseconds
+#define QTR_THRESHOLD     800  // microseconds (700)
 #define PRO_THRESHOLD     6    // distance from ZUMO
 
 // motor speed settings
@@ -13,8 +13,12 @@
 #define FORWARD_SPEED     80
 #define REVERSE_DURATION  100  // ms
 #define TURN_DURATION     200  // ms
-#define ETURN_DURATION    400 // ms
+//ETURN for emergency to get out of corners
+#define ETURN_DURATION    400  // ms 
 #define ETURN_SPEED       300
+//PTURN when patient is found and after 10 seconds of movement
+#define PTURN_SPEED       200 
+#define PTURN_DURATION    400 //ms
 
 Zumo32U4ButtonA buttonA;
 Zumo32U4Buzzer buzzer;
@@ -30,6 +34,10 @@ bool proxFrontActive;
 bool proxRightActive;
 
 int turnCount = 0;
+unsigned long timer;
+unsigned long interval = 10000;
+unsigned long newTimer = 0;
+
 
 void waitForButtonAndCountDown()
 {
@@ -80,6 +88,8 @@ void loop()
   int center_right_sensor = proxSensors.countsFrontWithRightLeds();
   int right_sensor = proxSensors.countsRightWithRightLeds();
 
+  timer = millis();     
+
   if (lineSensorValues[0] > QTR_THRESHOLD)
   {
     // If left sensor detects line, reverse and turn to the
@@ -103,11 +113,21 @@ void loop()
     // add one to the turn counter
     turnCount ++;
   }
-  
   else
   {
     // Otherwise, go straight.
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+    
+    //if going straight for 10 seconds, turn left
+    if (timer - newTimer >= interval)
+    {
+      newTimer = timer;
+      //turn after 10 seconds
+      motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+      delay(REVERSE_DURATION);
+      motors.setSpeeds(PTURN_SPEED, -PTURN_SPEED);
+      delay(PTURN_DURATION);         
+    }
   }
   if (turnCount == 20)
   {
@@ -122,7 +142,7 @@ void loop()
   }
   if (left_sensor >= PRO_THRESHOLD || center_left_sensor >= PRO_THRESHOLD)
   {
-    motors.setSpeeds(0,0);
+     motors.setSpeeds(0,0);
     Serial.print("PERSON FOUND: ");
     //play tune
     for (int i = 0; i < 3; i++)
@@ -132,13 +152,13 @@ void loop()
     }
     motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
     delay(REVERSE_DURATION);
-    motors.setSpeeds(ETURN_SPEED, -ETURN_SPEED);
-    delay(ETURN_DURATION);
+    motors.setSpeeds(PTURN_SPEED, -PTURN_SPEED);
+    delay(PTURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
   }
   else if (center_right_sensor >= PRO_THRESHOLD || right_sensor >= PRO_THRESHOLD)
   {
-    motors.setSpeeds(0,0);
+     motors.setSpeeds(0,0);
     Serial1.println("PERSON FOUND: ");
     //play tune
     for (int i = 0; i < 3; i++)
@@ -148,8 +168,8 @@ void loop()
     }
     motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
     delay(REVERSE_DURATION);
-    motors.setSpeeds(-ETURN_SPEED, ETURN_SPEED);
-    delay(ETURN_DURATION);
+    motors.setSpeeds(-PTURN_SPEED, PTURN_SPEED);
+    delay(PTURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
   }
 }

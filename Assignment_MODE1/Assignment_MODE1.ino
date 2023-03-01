@@ -18,11 +18,7 @@
 Zumo32U4ButtonA buttonA;
 Zumo32U4Buzzer buzzer;
 Zumo32U4Motors motors;
-Zumo32U4LineSensors lineSensors;
 Zumo32U4ProximitySensors proxSensors;
-
-#define NUM_SENSORS 3
-unsigned int lineSensorValues[NUM_SENSORS];
 
 int input;
 bool proxLeftActive;
@@ -54,9 +50,8 @@ void setup()
 {
 
   Serial1.begin(9600);
-  Serial.begin(9600);  
-
-  lineSensors.initThreeSensors();
+  Serial.begin(9600); 
+  
   proxSensors.initThreeSensors();
 
   waitForButtonAndCountDown();
