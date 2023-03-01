@@ -1,5 +1,4 @@
 
-
 #include <Wire.h>
 #include <Zumo32U4.h>
 #include <Zumo32U4Encoders.h>
@@ -27,13 +26,23 @@ Zumo32U4Encoders encoders;
 #define NUM_SENSORS 3
 unsigned int lineSensorValues[NUM_SENSORS];
 
+//user input variables
 int input;
+
+//distance travelled variables
 int16_t distanceTravelled;
 int16_t encoderTicks;
 int16_t wheelRotations;
+
+//proximity sensor variables
 bool proxLeftActive;
 bool proxFrontActive;
 bool proxRightActive;
+
+//timer variables
+unsigned long timer;
+unsigned long interval = 500;
+unsigned long newTimer = 0;
 
 
 void waitForButtonAndCountDown()
@@ -47,14 +56,14 @@ void waitForButtonAndCountDown()
 
 
   // Play Countdown notes
-  for (int i = 0; i < 3; i++)
-  {
-    delay(1000);
-    buzzer.playNote(NOTE_G(3), 200, 15);
-  }
-  delay(1000);
-  buzzer.playNote(NOTE_G(4), 500, 15);
-  delay(1000);
+  // for (int i = 0; i < 3; i++)
+  // {
+  //   delay(1000);
+  //   buzzer.playNote(NOTE_G(3), 200, 15);
+  // }
+  // delay(1000);
+  // buzzer.playNote(NOTE_G(4), 500, 15);
+  // delay(1000);
 }
 
 void setup()
@@ -77,15 +86,17 @@ void loop()
     buttonA.waitForRelease();
     waitForButtonAndCountDown();
   }
-
+  // read serial input
   input = Serial.read(); 
+  //read line sensors  
   lineSensors.read(lineSensorValues);
+  //read proximity sensors
   proxSensors.read();
   int left_sensor = proxSensors.countsLeftWithLeftLeds();
   int center_left_sensor = proxSensors.countsFrontWithLeftLeds();
   int center_right_sensor = proxSensors.countsFrontWithRightLeds();
   int right_sensor = proxSensors.countsRightWithRightLeds();
-
+  //find out distance travelled
   encoderTicks = encoders.getCountsLeft();
   wheelRotations = encoderTicks / 360;
   distanceTravelled = wheelRotations * 39;  
@@ -130,6 +141,20 @@ void loop()
         delay(TURN_DURATION);
       }
     }
+    else if (input == 'd')
+    {
+      motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+      delay(REVERSE_SPEED);
+      motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
+      delay(TURN_DURATION);
+    }
+    else if (input == 'a')
+    {    
+      motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+      delay(REVERSE_SPEED);
+      motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
+      delay(TURN_DURATION);                   
+    }
     else
     {
       // Otherwise, go straight.
@@ -147,7 +172,8 @@ void loop()
     for (int i = 0; i < 3; i++)
     {
       delay(500);
-      buzzer.playNote(NOTE_G(4), 200, 15);
+      //buzzer.playNote(NOTE_G(4), 200, 15);
+      
     }
     if (input == 'd')
     {
@@ -167,14 +193,14 @@ void loop()
   else if (center_right_sensor >= PRO_THRESHOLD || right_sensor >= PRO_THRESHOLD)
   {      
     motors.setSpeeds(0,0);
-    Serial.println("PERSON FOUND: ");
+    Serial.print("PERSON FOUND: ");
     Serial.print(distanceTravelled);
     Serial.print("\n");
     //play tune
     for (int i = 0; i < 3; i++)
     {
       delay(500);
-      buzzer.playNote(NOTE_G(4), 200, 15);
+      //buzzer.playNote(NOTE_G(4), 200, 15);
     }
     if (input == 'd')
     {
