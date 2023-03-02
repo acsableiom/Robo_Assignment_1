@@ -56,14 +56,14 @@ void waitForButtonAndCountDown()
 
 
   // Play Countdown notes
-  // for (int i = 0; i < 3; i++)
-  // {
-  //   delay(1000);
-  //   buzzer.playNote(NOTE_G(3), 200, 15);
-  // }
-  // delay(1000);
-  // buzzer.playNote(NOTE_G(4), 500, 15);
-  // delay(1000);
+  for (int i = 0; i < 3; i++)
+  {
+    delay(1000);
+    buzzer.playNote(NOTE_G(3), 200, 15);
+  }
+  delay(1000);
+  buzzer.playNote(NOTE_G(4), 500, 15);
+  delay(1000);
 }
 
 void setup()
@@ -172,7 +172,7 @@ void loop()
     for (int i = 0; i < 3; i++)
     {
       delay(500);
-      //buzzer.playNote(NOTE_G(4), 200, 15);
+      buzzer.playNote(NOTE_G(4), 200, 15);
       
     }
     if (input == 'd')
@@ -200,7 +200,7 @@ void loop()
     for (int i = 0; i < 3; i++)
     {
       delay(500);
-      //buzzer.playNote(NOTE_G(4), 200, 15);
+      buzzer.playNote(NOTE_G(4), 200, 15);
     }
     if (input == 'd')
     {
